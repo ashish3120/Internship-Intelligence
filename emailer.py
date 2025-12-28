@@ -5,7 +5,7 @@ from email.utils import formataddr
 
 def send_email(content):
     sender_email = "singhsajal177@gmail.com"
-    receiver_email = "ashishsingh66652@gmail.com"
+    receiver_email = "ashisharunsingh642@gmail.com"
     app_password = "xyblllkxmtcuugkt"
 
     msg = MIMEText(content, "plain", "utf-8")
