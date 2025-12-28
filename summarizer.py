@@ -1,24 +1,65 @@
-import google.generativeai as genai
+from google import genai
+from datetime import date
 
-genai.configure(api_key="AIzaSyAiIL44HifQ9Fttn0yau9LbKSXpeZH3rZ4")
+API_KEY = "AIzaSyAc_O3KYjI4QBiS-uvQIc8CxAnA3_GIMQY"
+client = genai.Client(api_key=API_KEY)
+
+MODEL_NAME = "models/gemini-flash-latest"
+
 
 def summarize_jobs(jobs):
-    if not jobs:
-        return "No new relevant early-career roles found today."
+    today = date.today().isoformat()
 
-    text = ""
+    if not jobs:
+        return f"""Daily Internship Intelligence Report
+Date: {today}
+
+Summary:
+• No relevant early-career or student-friendly roles were identified today.
+
+Recommendation:
+No action required today.
+"""
+
+    job_lines = []
     for j in jobs:
-        text += f"Title: {j[0]}, Company: {j[1]}, Tags: {j[2]}\n"
+        title, company, tags = j[0], j[1], j[2]
+        job_lines.append(f"- {title} at {company} | Tags: {', '.join(tags)}")
+
+    jobs_text = "\n".join(job_lines)
 
     prompt = f"""
-    You are a career assistant for a Computer Science student.
-    Summarize the following job listings into a short daily report.
-    Focus on student and early-career relevance.
+You are generating a concise internal report for a Computer Science student.
 
-    {text}
-    """
+Rules:
+- Be neutral and professional.
+- Do NOT use emojis.
+- Do NOT use tables.
+- Do NOT use marketing language.
+- Keep output concise and factual.
+- Assume the reader understands tech basics.
 
-    model = genai.GenerativeModel("gemini-pro")
-    response = model.generate_content(prompt)
+Input job listings:
+{jobs_text}
 
-    return response.text
+Output format exactly:
+
+Daily Internship Intelligence Report
+Date: {today}
+
+Summary:
+• <2-3 concise bullets>
+
+Details:
+- <one line per job>
+
+Recommendation:
+<one short paragraph>
+"""
+
+    response = client.models.generate_content(
+        model=MODEL_NAME,
+        contents=prompt
+    )
+
+    return response.text.strip()
